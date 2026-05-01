@@ -1,0 +1,157 @@
+---
+title: "Mapping Study Physical Activity to NHANES Quantiles"
+output: rmarkdown::html_vignette
+bibliography: references.bib
+vignette: >
+  %\VignetteIndexEntry{Mapping Study Physical Activity to NHANES Quantiles}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(mapnhanespa)
+```
+
+## Purpose
+
+`mapnhanespa` maps physical activity summaries from a study sample onto
+population-level quantiles estimated from the National Health and Nutrition
+Examination Survey (NHANES) 2011-2012 and 2013-2014 accelerometer waves. These
+NHANES cycles are useful reference populations because participants wore
+ActiGraph GT3X+ accelerometers on the non-dominant wrist for seven consecutive
+days, producing nationally representative accelerometry data.
+
+The package is designed for the common setting where a study has participant
+identifiers, age, sex or gender, a physical activity measure, and a value for
+that measure. Instead of comparing raw values across measures with different
+scales, the package evaluates each value against the corresponding NHANES
+cumulative distribution function (CDF). The result is a quantile in `[0, 1]`
+that can be interpreted relative to the NHANES reference distribution.
+
+The CDFs in this package are based on NHANES 2011-2014 activity count, MIMS, and
+step-count summaries. The step-count measures relate to work applying multiple
+step-counting algorithms to high-resolution wrist accelerometry data from
+NHANES 2011-2014 [@koffman2025stepcount]. The minute-level NHANES step count
+and physical activity data are also available through PhysioNet
+[@koffman2025physionet].
+
+## Basic Mapping
+
+Use `map_nhanes_pa_quantiles()` when the input data have one row per
+participant-measure observation.
+
+```{r}
+study_data <- data.frame(
+  id = c("P01", "P02", "P03"),
+  age = c(25, 62, 84),
+  sex = c("Female", "Male", "Female"),
+  measure = c("mims", "ssl_steps", "AC"),
+  value = c(15000, 7500, 1000000)
+)
+
+map_nhanes_pa_quantiles(study_data, id = "id")
+```
+
+The `measure` column accepts common aliases:
+
+```{r}
+measures <- data.frame(
+  id = c("P01", "P01", "P01"),
+  age = 25,
+  sex = "Female",
+  measure = c("mims", "PAXMTSM", "total_PAXMTSM"),
+  value = 15000
+)
+
+map_nhanes_pa_quantiles(measures, id = "id")
+```
+
+## Combined and Wave-Specific References
+
+By default, quantiles are evaluated against CDFs estimated from the combined
+2011-2012 and 2013-2014 NHANES waves.
+
+```{r}
+map_nhanes_pa_quantiles(study_data, id = "id")
+```
+
+To map against a specific NHANES wave, provide `wave`. Supported values include
+the NHANES data release cycles `7` and `8`, and the year labels `"2011-2012"`
+and `"2013-2014"`.
+
+```{r}
+map_nhanes_pa_quantiles(study_data, id = "id", wave = "2013-2014")
+```
+
+## Overall Age or Sex Strata
+
+If a study should be mapped without sex or gender stratification, set
+`sex = NULL`. The participant's age category is still used, but the CDF is
+selected from the `gender == "Overall"` stratum.
+
+```{r}
+map_nhanes_pa_quantiles(study_data, id = "id", sex = NULL)
+```
+
+If a study should be mapped without age stratification, set `age = NULL`. The
+participant's sex or gender is still used, but the CDF is selected from the
+`cat_age == "Overall"` stratum.
+
+```{r}
+map_nhanes_pa_quantiles(study_data, id = "id", age = NULL)
+```
+
+Both options can be combined with a wave-specific reference:
+
+```{r}
+map_nhanes_pa_quantiles(study_data, id = "id", sex = NULL, wave = 7)
+```
+
+The package data do not contain a stratum that is overall for both age and sex
+or gender. Calls that omit both age and sex therefore produce an error.
+
+## Single Values
+
+For a single participant-measure value, use `nhanes_pa_quantile()`.
+
+```{r}
+nhanes_pa_quantile(
+  value = 15000,
+  age = 25,
+  sex = "Female",
+  measure = "mims"
+)
+```
+
+The same combined, wave-specific, and overall-stratum options are available:
+
+```{r}
+nhanes_pa_quantile(
+  value = 15000,
+  age = 25,
+  sex = NULL,
+  measure = "mims",
+  wave = "2011-2012"
+)
+```
+
+## Age Categories
+
+Ages are mapped into NHANES CDF age categories:
+
+```{r}
+suppressWarnings(nhanes_pa_age_category(c(8, 25, 84, 90)))
+```
+
+Ages greater than 85 are mapped to the oldest available category, `"[80,85)"`,
+and produce a warning when age is supplied directly. If a study already has age
+categories, pass the column name through `age_category`.
+
+## References

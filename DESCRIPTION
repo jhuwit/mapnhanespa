@@ -16,9 +16,12 @@ RoxygenNote: 7.3.3
 Depends: 
     R (>= 3.5)
 LazyData: true
+LazyDataCompression: xz
 URL: https://github.com/jhuwit/mapnhanespa
 BugReports: https://github.com/jhuwit/mapnhanespa/issues
-Imports: 
-    assertthat,
-    dplyr,
-    survey
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+VignetteBuilder: knitr
