@@ -38,6 +38,8 @@
 #' map_nhanes_pa_quantiles(example_data, sex = NULL)
 #'
 #' map_nhanes_pa_quantiles(example_data, age = NULL, wave = "2011-2012")
+#' map_nhanes_pa_quantiles(example_data, age = NULL, sex = NULL)
+#'
 map_nhanes_pa_quantiles <- function(data,
                                     id = NULL,
                                     age = "age",
@@ -175,7 +177,7 @@ nhanes_pa_quantile <- function(value,
                                wave = NULL,
                                age_category = NULL) {
   data <- data.frame(
-    age = if (is.null(age)) NA_real_ else age,
+    age = if (is.null(age)) "Overall" else age,
     sex = if (is.null(sex)) "Overall" else sex,
     measure = measure,
     value = value,
@@ -307,7 +309,7 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 
   out <- rep(NA_character_, length(key))
   out[key %in% c("ac", "activitycounts", "counts", "totalac")] <- "AC"
-  out[key %in% c("mims", "paxmtsm", "totalpaxmtsm")] <- "PAXMTSM"
+  out[key %in% c("mims", "paxmtsm", "totalpaxmtsm", "mimsunit")] <- "PAXMTSM"
   out[key %in% c(
     "sslsteps", "scsslsteps", "steps", "stepcount", "stepcounts",
     "totalsslsteps", "totalscsslsteps"

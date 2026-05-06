@@ -61,4 +61,6 @@ map_nhanes_pa_quantiles(example_data)
 map_nhanes_pa_quantiles(example_data, sex = NULL)
 
 map_nhanes_pa_quantiles(example_data, age = NULL, wave = "2011-2012")
+map_nhanes_pa_quantiles(example_data, age = NULL, sex = NULL)
+
 }
