@@ -104,7 +104,6 @@ map_nhanes_pa_quantiles <- function(data,
     },
     stringsAsFactors = FALSE
   )
-  .stop_if_fully_overall(key$cat_age, key$gender)
 
   if (is.null(wave)) {
     key$data_release_cycle <- NA_integer_
@@ -259,19 +258,6 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   invisible(NULL)
 }
 
-.stop_if_fully_overall <- function(cat_age, gender) {
-  fully_overall <- which(cat_age == "Overall" & gender == "Overall")
-  if (length(fully_overall) == 0) {
-    return(invisible(NULL))
-  }
-
-  stop(
-    "The NHANES CDF data do not include strata that are overall for both ",
-    "age and sex/gender. Provide either `age` or `sex`, or use a specific ",
-    "`age_category` or sex/gender value.",
-    call. = FALSE
-  )
-}
 
 .evaluate_cdf <- function(cdf, value) {
   if (!is.function(cdf) || is.na(value)) {

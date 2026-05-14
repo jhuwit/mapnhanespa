@@ -65,10 +65,10 @@ test_that("invalid inputs fail clearly", {
   )
   expect_error(map_nhanes_pa_quantiles(data, sex = "gender"), "Missing required")
   expect_true(is.na(map_nhanes_pa_quantiles(data, wave = "cycle")$nhanes_quantile))
-  expect_error(
-    map_nhanes_pa_quantiles(data, age = NULL, sex = NULL),
-    "overall for both age and sex/gender"
-  )
+  # expect_error(
+  #   map_nhanes_pa_quantiles(data, age = NULL, sex = NULL),
+  #   "overall for both age and sex/gender"
+  # )
 })
 
 test_that("ages greater than 85 warn but map to oldest category", {
@@ -111,9 +111,9 @@ test_that("scalar quantile helper supports all lookup modes", {
     measure = "mims",
     wave = "2013-2014"
   )))
-  expect_error(
+  expect_equal(
     nhanes_pa_quantile(15000, age = NULL, sex = NULL, measure = "mims"),
-    "overall for both age and sex/gender"
+    0.562398771709386
   )
 })
 
@@ -179,11 +179,4 @@ test_that("value_or_column returns columns or recycled scalar values", {
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
 
-test_that("fully overall validation is silent unless both keys are Overall", {
-  expect_silent(mapnhanespa:::.stop_if_fully_overall("[20,30)", "Overall"))
-  expect_silent(mapnhanespa:::.stop_if_fully_overall("Overall", "Female"))
-  expect_error(
-    mapnhanespa:::.stop_if_fully_overall("Overall", "Overall"),
-    "overall for both age and sex/gender"
-  )
-})
+
