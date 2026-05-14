@@ -15,6 +15,22 @@ test_that("participant data are mapped with combined and wave CDFs", {
   expect_false(identical(combined$nhanes_quantile, by_wave$nhanes_quantile))
 })
 
+test_that("participant data are mapped with combined and wave CDFs", {
+  data <- tibble::tribble(
+    ~sex, ~age, ~measure,    ~value,
+    "Female",   27,  "steps",      5915,
+    "Female",   27,     "ac", 1944555.8
+  )
+
+
+  combined <- map_nhanes_pa_quantiles(data)
+  by_wave <- map_nhanes_pa_quantiles(data, wave = "2013-2014")
+
+  expect_true(all(!is.na(combined$nhanes_quantile)))
+  expect_true(all(!is.na(by_wave$nhanes_quantile)))
+  expect_false(identical(combined$nhanes_quantile, by_wave$nhanes_quantile))
+})
+
 test_that("overall age and sex strata are supported when present", {
   data <- data.frame(
     id = 1:2,
