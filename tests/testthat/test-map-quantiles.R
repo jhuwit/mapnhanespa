@@ -16,9 +16,9 @@ test_that("participant data are mapped with combined and wave CDFs", {
 })
 
 test_that("participant data are mapped with combined and wave CDFs", {
-  data <- tibble::tribble(
+  data <- dplyr::tribble(
     ~sex, ~age, ~measure,    ~value,
-    "Female",   27,  "steps",      5915,
+    "Female",   27,  "sslsteps",      5915,
     "Female",   27,     "ac", 1944555.8
   )
 
@@ -150,18 +150,24 @@ test_that("CDF table helper returns combined and wave-specific keys", {
 })
 
 test_that("standardization helpers normalize common aliases", {
+  values = c(
+    "AC", "activity counts", "counts", "total_AC",
+    "mims", "PAXMTSM", "total_PAXMTSM",
+    "ssl_steps", "scsslsteps", "steps", "ssl step count", "ssl step counts",
+    "total_ssl_steps", "total_scsslsteps",
+    "steps_stepcount_ssl", "steps_stepcount_rf",
+    "steps_vs_original", "steps_vs_revised", "steps_sdt",
+    "unknown"
+  )
   expect_equal(
-    mapnhanespa:::.standardize_measure(c(
-      "AC", "activity counts", "counts", "total_AC",
-      "mims", "PAXMTSM", "total_PAXMTSM",
-      "ssl_steps", "scsslsteps", "steps", "step count", "step counts",
-      "total_ssl_steps", "total_scsslsteps", "unknown"
-    )),
+    mapnhanespa:::.standardize_measure(values),
     c(
       "AC", "AC", "AC", "AC",
       "PAXMTSM", "PAXMTSM", "PAXMTSM",
-      "scsslsteps", "scsslsteps", "scsslsteps", "scsslsteps", "scsslsteps",
-      "scsslsteps", "scsslsteps", NA
+      "scsslsteps", "scsslsteps", NA, "scsslsteps", "scsslsteps",
+      "scsslsteps", "scsslsteps", "scsslsteps",
+       "scrfsteps", "vsstepsoriginal", "vsstepsrevised", "sdtsteps",
+      NA
     )
   )
 
@@ -194,5 +200,4 @@ test_that("value_or_column returns columns or recycled scalar values", {
   expect_equal(mapnhanespa:::.value_or_column(data, "wave", 2), c(7, 8))
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
-
 

@@ -115,12 +115,10 @@ map_nhanes_pa_quantiles <- function(data,
     by_cols <- c("measure", "data_release_cycle", "cat_age", "gender")
   }
 
-  matched <- merge(
+  matched <- dplyr::left_join(
     key,
     cdf_table,
-    by = by_cols,
-    all.x = TRUE,
-    sort = FALSE
+    by = by_cols
   )
   matched <- matched[order(matched$.row_id), , drop = FALSE]
 
@@ -143,8 +141,10 @@ map_nhanes_pa_quantiles <- function(data,
 #' @param sex Sex/gender. Common values such as `"M"`, `"male"`, `"F"`, and
 #'   `"female"` are normalized. Set to `NULL` to use the sex/gender-overall CDFs.
 #' @param measure Physical activity measure. Supported aliases include
-#'   `"mims"`, `"PAXMTSM"`, `"ssl_steps"`, `"scsslsteps"`, `"steps"`, and
-#'   `"AC"`.
+#'   `"mims"`, `"PAXMTSM"`, `"ssl_steps"`, `"scsslsteps"`, `"steps"`,
+#'   Verisense step aliases such as `"steps_stepcount_ssl"`,
+#'   `"steps_stepcount_rf"`, `"steps_vs_original"`, `"steps_vs_revised"`,
+#'   `"steps_sdt"`, and `"AC"`.
 #' @param wave Optional NHANES wave. Supported values are `7`, `8`,
 #'   `"2011-2012"`, and `"2013-2014"`.
 #' @param age_category Optional NHANES age category such as `"[20,30)"` or
@@ -297,9 +297,35 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   out[key %in% c("ac", "activitycounts", "counts", "totalac")] <- "AC"
   out[key %in% c("mims", "paxmtsm", "totalpaxmtsm", "mimsunit")] <- "PAXMTSM"
   out[key %in% c(
-    "sslsteps", "scsslsteps", "steps", "stepcount", "stepcounts",
-    "totalsslsteps", "totalscsslsteps"
+    "sslsteps", "scsslsteps",
+    "totalsslsteps", "totalscsslsteps",
+    "stepsstepcountssl",
+    "steps_stepcount_ssl",
+    "steps_stepcounts_ssl"
   )] <- "scsslsteps"
+  out[key %in% c(
+    "sslsteps", "scsslsteps", "sslstepcount", "sslstepcounts",
+    "totalsslsteps", "totalscsslsteps",
+    "stepsstepcountssl"
+  )] <- "scsslsteps"
+  out[key %in% c(
+    "rfsteps", "scrfsteps", "rfstepcount", "rfstepcounts",
+    "totalrfsteps", "totalscrfsteps",
+    "stepsstepcountrf",
+    "steps_stepcount_rf",
+    "steps_stepcounts_rf"
+  )] <- "scrfsteps"
+  out[key %in% c(
+    "vsstepsoriginal",
+    "stepsvsoriginal"
+  )] <- "vsstepsoriginal"
+  out[key %in% c(
+    "vsstepsrevised",
+    "stepsvsrevised"
+  )] <- "vsstepsrevised"
+  out[key %in% c(
+    "stepssdt"
+  )] <- "sdtsteps"
   out
 }
 
