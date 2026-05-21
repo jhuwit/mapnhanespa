@@ -271,13 +271,21 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
     cdf_tables <- list(
       AC = cdf_ac_bywave,
       PAXMTSM = cdf_mims_bywave,
-      scsslsteps = cdf_ssl_steps_bywave
+      scsslsteps = cdf_ssl_steps_bywave,
+      scrfsteps = cdf_rf_steps_bywave,
+      oaksteps = cdf_forest_steps_bywave,
+      vssteps = cdf_vs_original_steps_bywave,
+      vsrevsteps = cdf_vs_revised_steps_bywave
     )
   } else {
     cdf_tables <- list(
       AC = cdf_ac,
       PAXMTSM = cdf_mims,
-      scsslsteps = cdf_ssl_steps
+      scsslsteps = cdf_ssl_steps,
+      scrfsteps = cdf_rf_steps,
+      oaksteps = cdf_forest_steps,
+      vssteps = cdf_vs_original_steps,
+      vsrevsteps = cdf_vs_revised_steps
     )
   }
 
@@ -316,13 +324,22 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
     "steps_stepcounts_rf"
   )] <- "scrfsteps"
   out[key %in% c(
+    "oaksteps",
+    "foreststeps",
+    "stepsstepcountforest",
+    "steps_stepcount_forest",
+    "steps_stepcounts_forest"
+  )] <- "oaksteps"
+  out[key %in% c(
+    "vssteps",
     "vsstepsoriginal",
     "stepsvsoriginal"
-  )] <- "vsstepsoriginal"
+  )] <- "vssteps"
   out[key %in% c(
+    "vsrevsteps",
     "vsstepsrevised",
     "stepsvsrevised"
-  )] <- "vsstepsrevised"
+  )] <- "vsrevsteps"
   out[key %in% c(
     "stepssdt"
   )] <- "sdtsteps"

@@ -18,3 +18,15 @@ usethis::use_data(cdf_ssl_steps_bywave, overwrite = TRUE)
 cdf_mims_bywave = cdfs$PAXMTSM
 usethis::use_data(cdf_mims_bywave, overwrite = TRUE)
 
+
+cdf_rf_steps_bywave = cdfs$scrfsteps
+usethis::use_data(cdf_rf_steps_bywave, overwrite = TRUE)
+
+cdf_forest_steps_bywave = cdfs$oaksteps
+usethis::use_data(cdf_forest_steps_bywave, overwrite = TRUE)
+
+cdf_vs_original_steps_bywave = cdfs$vssteps
+usethis::use_data(cdf_vs_original_steps_bywave, overwrite = TRUE)
+
+cdf_vs_revised_steps_bywave = cdfs$vsrevsteps
+usethis::use_data(cdf_vs_revised_steps_bywave, overwrite = TRUE)

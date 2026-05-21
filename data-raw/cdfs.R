@@ -17,3 +17,15 @@ usethis::use_data(cdf_ssl_steps, overwrite = TRUE)
 
 cdf_mims = cdfs$PAXMTSM
 usethis::use_data(cdf_mims, overwrite = TRUE)
+
+cdf_rf_steps = cdfs$scrfsteps
+usethis::use_data(cdf_rf_steps, overwrite = TRUE)
+
+cdf_forest_steps = cdfs$oaksteps
+usethis::use_data(cdf_forest_steps, overwrite = TRUE)
+
+cdf_vs_original_steps = cdfs$vssteps
+usethis::use_data(cdf_vs_original_steps, overwrite = TRUE)
+
+cdf_vs_revised_steps = cdfs$vsrevsteps
+usethis::use_data(cdf_vs_revised_steps, overwrite = TRUE)

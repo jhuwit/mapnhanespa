@@ -145,7 +145,14 @@ test_that("CDF table helper returns combined and wave-specific keys", {
   combined <- mapnhanespa:::.nhanes_pa_cdf_table(FALSE)
   by_wave <- mapnhanespa:::.nhanes_pa_cdf_table(TRUE)
 
-  expect_setequal(unique(combined$measure), c("AC", "PAXMTSM", "scsslsteps"))
+  expect_setequal(
+    unique(combined$measure),
+    c("AC", "PAXMTSM", "scsslsteps", "scrfsteps", "oaksteps", "vssteps", "vsrevsteps")
+  )
+  expect_setequal(
+    unique(by_wave$measure),
+    c("AC", "PAXMTSM", "scsslsteps", "scrfsteps", "oaksteps", "vssteps", "vsrevsteps")
+  )
   expect_setequal(unique(by_wave$data_release_cycle), c(7, 8))
 })
 
@@ -156,7 +163,9 @@ test_that("standardization helpers normalize common aliases", {
     "ssl_steps", "scsslsteps", "steps", "ssl step count", "ssl step counts",
     "total_ssl_steps", "total_scsslsteps",
     "steps_stepcount_ssl", "steps_stepcount_rf",
-    "steps_vs_original", "steps_vs_revised", "steps_sdt",
+    "oaksteps", "steps_stepcount_forest",
+    "steps_vs_original", "steps_vs_revised", "vssteps", "vsrevsteps",
+    "steps_sdt",
     "unknown"
   )
   expect_equal(
@@ -166,7 +175,8 @@ test_that("standardization helpers normalize common aliases", {
       "PAXMTSM", "PAXMTSM", "PAXMTSM",
       "scsslsteps", "scsslsteps", NA, "scsslsteps", "scsslsteps",
       "scsslsteps", "scsslsteps", "scsslsteps",
-       "scrfsteps", "vsstepsoriginal", "vsstepsrevised", "sdtsteps",
+       "scrfsteps", "oaksteps", "oaksteps",
+       "vssteps", "vsrevsteps", "vssteps", "vsrevsteps", "sdtsteps",
       NA
     )
   )
@@ -200,4 +210,3 @@ test_that("value_or_column returns columns or recycled scalar values", {
   expect_equal(mapnhanespa:::.value_or_column(data, "wave", 2), c(7, 8))
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
-
