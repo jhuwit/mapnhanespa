@@ -348,15 +348,15 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 }
 
 .nhanes_pa_cdf_keys <- function(by_wave = FALSE) {
-  measures <- sort(unique(.standardize_measure(nhanes_measure_data$measure)))
-  ages <- sort(unique(as.character(nhanes_measure_data$cat_age)))
-  genders <- sort(unique(.standardize_gender(nhanes_measure_data$gender)))
+  measures <- sort(unique(.standardize_measure(mapnhanespa::nhanes_measure_data$measure)))
+  ages <- sort(unique(as.character(mapnhanespa::nhanes_measure_data$cat_age)))
+  genders <- sort(unique(.standardize_gender(mapnhanespa::nhanes_measure_data$gender)))
 
   ages <- unique(c(ages, "Overall"))
   genders <- unique(c(genders, "Overall"))
 
   if (by_wave) {
-    waves <- sort(unique(nhanes_measure_data$data_release_cycle))
+    waves <- sort(unique(mapnhanespa::nhanes_measure_data$data_release_cycle))
     expand.grid(
       measure = measures,
       data_release_cycle = waves,
@@ -390,7 +390,7 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
     return(.nhanes_pa_cache$get_cdf(key))
   }
 
-  data <- nhanes_measure_data
+  data <- mapnhanespa::nhanes_measure_data
   data <- data[data$measure == measure, , drop = FALSE]
   if (!is.null(data_release_cycle)) {
     data <- data[data$data_release_cycle == data_release_cycle, , drop = FALSE]
@@ -517,11 +517,4 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 
 lockBinding(".nhanes_pa_cache", environment())
 
-utils::globalVariables(c(
-  "cdf_ac",
-  "cdf_ac_bywave",
-  "cdf_mims",
-  "cdf_mims_bywave",
-  "cdf_ssl_steps",
-  "cdf_ssl_steps_bywave"
-))
+
