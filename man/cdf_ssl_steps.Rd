@@ -5,7 +5,7 @@
 \alias{cdf_ssl_steps}
 \title{NHANES SSL step cumulative distribution functions}
 \format{
-A data frame with 29 rows and 3 variables:
+A data frame with 30 rows and 3 variables:
 \describe{
 \item{cat_age}{NHANES age category.}
 \item{gender}{Gender stratum: \code{"Female"}, \code{"Male"}, or \code{"Overall"}.}

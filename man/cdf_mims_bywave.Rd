@@ -5,7 +5,7 @@
 \alias{cdf_mims_bywave}
 \title{NHANES MIMS cumulative distribution functions by wave}
 \format{
-A data frame with 58 rows and 4 variables:
+A data frame with 60 rows and 4 variables:
 \describe{
 \item{data_release_cycle}{NHANES data release cycle, where \code{7}
 corresponds to 2011-2012 and \code{8} corresponds to 2013-2014.}
