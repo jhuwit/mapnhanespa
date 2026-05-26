@@ -134,7 +134,15 @@ test_that("scalar quantile helper supports all lookup modes", {
 })
 
 test_that("internal CDF evaluation handles missing matches and missing values", {
-  f <- cdf_mims$cdf[[which(cdf_mims$cat_age == "[20,30)" & cdf_mims$gender == "Female")[1]]]
+  f <- mapnhanespa:::.nhanes_pa_cdf_table(
+    FALSE,
+    data.frame(
+      measure = "PAXMTSM",
+      cat_age = "[20,30)",
+      gender = "Female",
+      stringsAsFactors = FALSE
+    )
+  )$cdf[[1]]
 
   expect_equal(mapnhanespa:::.evaluate_cdf(NULL, 15000), NA_real_)
   expect_equal(mapnhanespa:::.evaluate_cdf(f, NA_real_), NA_real_)
@@ -154,6 +162,36 @@ test_that("CDF table helper returns combined and wave-specific keys", {
     c("AC", "PAXMTSM", "scsslsteps", "scrfsteps", "oaksteps", "vssteps", "vsrevsteps")
   )
   expect_setequal(unique(by_wave$data_release_cycle), c(7, 8))
+})
+
+test_that("precompute warms the cache for all supported CDFs", {
+  mapnhanespa:::.nhanes_pa_cache$clear_cdf()
+
+  result <- precompute_nhanes_pa_cdfs()
+  measures <- unique(mapnhanespa:::.standardize_measure(nhanes_measure_data$measure))
+  ages <- unique(c(sort(unique(as.character(nhanes_measure_data$cat_age))), "Overall"))
+  genders <- unique(c(sort(unique(mapnhanespa:::.standardize_gender(nhanes_measure_data$gender))), "Overall"))
+  waves <- sort(unique(nhanes_measure_data$data_release_cycle))
+
+  expect_equal(
+    nrow(result$combined),
+    length(measures) * length(ages) * length(genders)
+  )
+  expect_equal(
+    nrow(result$by_wave),
+    length(measures) * length(waves) * length(ages) * length(genders)
+  )
+  expect_equal(
+    mapnhanespa:::.nhanes_pa_cache$size(),
+    nrow(result$combined) + nrow(result$by_wave)
+  )
+
+  cached_size <- mapnhanespa:::.nhanes_pa_cache$size()
+  result_again <- precompute_nhanes_pa_cdfs()
+
+  expect_equal(mapnhanespa:::.nhanes_pa_cache$size(), cached_size)
+  expect_equal(nrow(result_again$combined), nrow(result$combined))
+  expect_equal(nrow(result_again$by_wave), nrow(result$by_wave))
 })
 
 test_that("standardization helpers normalize common aliases", {

@@ -25,8 +25,7 @@ when supplied, but otherwise left unchanged.}
 \item{age, sex, measure, value}{Column names in \code{data} containing age in years,
 sex/gender, physical activity measure, and observed value. Set \code{age = NULL}
 to use the age-overall CDFs. Set \code{sex = NULL} to use the sex/gender-overall
-CDFs. The package data do not include CDFs that are overall for both age and
-sex/gender.}
+CDFs. Setting both to \code{NULL} uses the overall CDF across both dimensions.}
 
 \item{wave}{Optional NHANES wave column name or scalar value. Supported values
 are \code{7}, \code{8}, \code{"2011-2012"}, and \code{"2013-2014"}. If \code{NULL}, the combined

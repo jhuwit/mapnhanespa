@@ -9,8 +9,7 @@
 #' @param age,sex,measure,value Column names in `data` containing age in years,
 #'   sex/gender, physical activity measure, and observed value. Set `age = NULL`
 #'   to use the age-overall CDFs. Set `sex = NULL` to use the sex/gender-overall
-#'   CDFs. The package data do not include CDFs that are overall for both age and
-#'   sex/gender.
+#'   CDFs. Setting both to `NULL` uses the overall CDF across both dimensions.
 #' @param id Optional participant identifier column name. The column is checked
 #'   when supplied, but otherwise left unchanged.
 #' @param wave Optional NHANES wave column name or scalar value. Supported values
@@ -107,13 +106,16 @@ map_nhanes_pa_quantiles <- function(data,
 
   if (is.null(wave)) {
     key$data_release_cycle <- NA_integer_
-    cdf_table <- .nhanes_pa_cdf_table(by_wave = FALSE)
     by_cols <- c("measure", "cat_age", "gender")
   } else {
     key$data_release_cycle <- .standardize_wave(.value_or_column(data, wave, nrow(data)))
-    cdf_table <- .nhanes_pa_cdf_table(by_wave = TRUE)
     by_cols <- c("measure", "data_release_cycle", "cat_age", "gender")
   }
+
+  cdf_table <- .nhanes_pa_cdf_table(
+    by_wave = !is.null(wave),
+    keys = unique(key[, by_cols, drop = FALSE])
+  )
 
   matched <- dplyr::left_join(
     key,
@@ -131,6 +133,21 @@ map_nhanes_pa_quantiles <- function(data,
   )
 
   out
+}
+
+#' Precompute and cache NHANES PA CDFs
+#'
+#' Builds every supported CDF combination and stores the result in the internal
+#' cache. This covers combined and by-wave CDFs, age-specific and
+#' age-overall strata, sex/gender-specific and sex/gender-overall strata, and
+#' the overall-overall combination for each supported measure.
+#'
+#' @return Invisibly returns a list with the cached combined and by-wave tables.
+#' @export
+precompute_nhanes_pa_cdfs <- function() {
+  combined <- .nhanes_pa_cdf_table(by_wave = FALSE)
+  by_wave <- .nhanes_pa_cdf_table(by_wave = TRUE)
+  invisible(list(combined = combined, by_wave = by_wave))
 }
 
 #' Evaluate a single NHANES physical activity quantile
@@ -266,35 +283,133 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   as.numeric(cdf(value))
 }
 
-.nhanes_pa_cdf_table <- function(by_wave = FALSE) {
-  if (by_wave) {
-    cdf_tables <- list(
-      AC = mapnhanespa::cdf_ac_bywave,
-      PAXMTSM = mapnhanespa::cdf_mims_bywave,
-      scsslsteps = mapnhanespa::cdf_ssl_steps_bywave,
-      scrfsteps = mapnhanespa::cdf_rf_steps_bywave,
-      oaksteps = mapnhanespa::cdf_forest_steps_bywave,
-      vssteps = mapnhanespa::cdf_vs_original_steps_bywave,
-      vsrevsteps = mapnhanespa::cdf_vs_revised_steps_bywave
+.nhanes_pa_cdf_table <- function(by_wave = FALSE, keys = NULL) {
+  if (is.null(keys)) {
+    keys <- .nhanes_pa_cdf_keys(by_wave = by_wave)
+  } else {
+    keys <- as.data.frame(keys, stringsAsFactors = FALSE)
+    if (!"measure" %in% names(keys)) {
+      stop("`keys` must include a `measure` column.", call. = FALSE)
+    }
+    if (!"cat_age" %in% names(keys)) {
+      keys$cat_age <- "Overall"
+    }
+    if (!"gender" %in% names(keys)) {
+      keys$gender <- "Overall"
+    }
+    keys$measure <- .standardize_measure(keys$measure)
+    keys$cat_age <- as.character(keys$cat_age)
+    keys$gender <- .standardize_gender(keys$gender)
+    if (by_wave) {
+      if (!"data_release_cycle" %in% names(keys)) {
+        stop("`keys` must include `data_release_cycle` when `by_wave = TRUE`.", call. = FALSE)
+      }
+      keys$data_release_cycle <- .standardize_wave(keys$data_release_cycle)
+    }
+  }
+
+  by_cols <- if (by_wave) {
+    c("measure", "data_release_cycle", "cat_age", "gender")
+  } else {
+    c("measure", "cat_age", "gender")
+  }
+
+  keys <- keys[stats::complete.cases(keys[, by_cols, drop = FALSE]), by_cols, drop = FALSE]
+  keys <- unique(keys)
+
+  keys$cdf <- if (nrow(keys) == 0) {
+    list()
+  } else if (by_wave) {
+    purrr::pmap(
+      keys,
+      function(measure, data_release_cycle, cat_age, gender) {
+        .nhanes_pa_cdf_one(
+          measure = measure,
+          cat_age = cat_age,
+          gender = gender,
+          data_release_cycle = data_release_cycle
+        )
+      }
     )
   } else {
-    cdf_tables <- list(
-      AC = mapnhanespa::cdf_ac,
-      PAXMTSM = mapnhanespa::cdf_mims,
-      scsslsteps = mapnhanespa::cdf_ssl_steps,
-      scrfsteps = mapnhanespa::cdf_rf_steps,
-      oaksteps = mapnhanespa::cdf_forest_steps,
-      vssteps = mapnhanespa::cdf_vs_original_steps,
-      vsrevsteps = mapnhanespa::cdf_vs_revised_steps
+    purrr::pmap(
+      keys,
+      function(measure, cat_age, gender) {
+        .nhanes_pa_cdf_one(
+          measure = measure,
+          cat_age = cat_age,
+          gender = gender
+        )
+      }
     )
   }
 
-  tables <- Map(function(x, nm) {
-    x$measure <- nm
-    x
-  }, cdf_tables, names(cdf_tables))
+  keys
+}
 
-  do.call(rbind, tables)
+.nhanes_pa_cdf_keys <- function(by_wave = FALSE) {
+  measures <- sort(unique(.standardize_measure(nhanes_measure_data$measure)))
+  ages <- sort(unique(as.character(nhanes_measure_data$cat_age)))
+  genders <- sort(unique(.standardize_gender(nhanes_measure_data$gender)))
+
+  ages <- unique(c(ages, "Overall"))
+  genders <- unique(c(genders, "Overall"))
+
+  if (by_wave) {
+    waves <- sort(unique(nhanes_measure_data$data_release_cycle))
+    expand.grid(
+      measure = measures,
+      data_release_cycle = waves,
+      cat_age = ages,
+      gender = genders,
+      stringsAsFactors = FALSE
+    )
+  } else {
+    expand.grid(
+      measure = measures,
+      cat_age = ages,
+      gender = genders,
+      stringsAsFactors = FALSE
+    )
+  }
+}
+
+.nhanes_pa_cdf_one <- function(measure,
+                               cat_age,
+                               gender,
+                               data_release_cycle = NULL) {
+  key <- paste(
+    if (is.null(data_release_cycle)) "combined" else paste0("wave-", data_release_cycle),
+    measure,
+    cat_age,
+    gender,
+    sep = "|"
+  )
+
+  if (.nhanes_pa_cache$has_cdf(key)) {
+    return(.nhanes_pa_cache$get_cdf(key))
+  }
+
+  data <- nhanes_measure_data
+  data <- data[data$measure == measure, , drop = FALSE]
+  if (!is.null(data_release_cycle)) {
+    data <- data[data$data_release_cycle == data_release_cycle, , drop = FALSE]
+  }
+  if (!identical(cat_age, "Overall")) {
+    data <- data[data$cat_age == cat_age, , drop = FALSE]
+  }
+  if (!identical(gender, "Overall")) {
+    data <- data[data$gender == gender, , drop = FALSE]
+  }
+
+  cdf <- if (nrow(data) == 0) {
+    NA_real_
+  } else {
+    run_cdf(data)
+  }
+
+  .nhanes_pa_cache$set_cdf(key, cdf)
+  cdf
 }
 
 .standardize_measure <- function(measure) {
@@ -303,7 +418,9 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 
   out <- rep(NA_character_, length(key))
   out[key %in% c("ac", "activitycounts", "counts", "totalac")] <- "AC"
+  out[key %in% c("log10ac", "log10activitycounts", "log10counts", "totallog10ac")] <- "log10AC"
   out[key %in% c("mims", "paxmtsm", "totalpaxmtsm", "mimsunit")] <- "PAXMTSM"
+  out[key %in% c("log10mims", "log10paxmtsm", "totallog10paxmtsm", "log10mimsunit")] <- "log10PAXMTSM"
   out[key %in% c(
     "sslsteps", "scsslsteps",
     "totalsslsteps", "totalscsslsteps",
@@ -373,6 +490,32 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   }
   rep(x, length.out = n)
 }
+
+.nhanes_pa_cache <- local({
+  cdf_cache <- new.env(parent = emptyenv())
+
+  list(
+    has_cdf = function(key) {
+      exists(key, envir = cdf_cache, inherits = FALSE)
+    },
+    get_cdf = function(key) {
+      get(key, envir = cdf_cache, inherits = FALSE)
+    },
+    set_cdf = function(key, value) {
+      assign(key, value, envir = cdf_cache)
+      invisible(value)
+    },
+    clear_cdf = function() {
+      rm(list = ls(cdf_cache, all.names = TRUE), envir = cdf_cache)
+      invisible(NULL)
+    },
+    size = function() {
+      length(ls(cdf_cache, all.names = TRUE))
+    }
+  )
+})
+
+lockBinding(".nhanes_pa_cache", environment())
 
 utils::globalVariables(c(
   "cdf_ac",
