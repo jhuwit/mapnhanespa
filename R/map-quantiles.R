@@ -269,23 +269,23 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 .nhanes_pa_cdf_table <- function(by_wave = FALSE) {
   if (by_wave) {
     cdf_tables <- list(
-      AC = cdf_ac_bywave,
-      PAXMTSM = cdf_mims_bywave,
-      scsslsteps = cdf_ssl_steps_bywave,
-      scrfsteps = cdf_rf_steps_bywave,
-      oaksteps = cdf_forest_steps_bywave,
-      vssteps = cdf_vs_original_steps_bywave,
-      vsrevsteps = cdf_vs_revised_steps_bywave
+      AC = mapnhanespa::cdf_ac_bywave,
+      PAXMTSM = mapnhanespa::cdf_mims_bywave,
+      scsslsteps = mapnhanespa::cdf_ssl_steps_bywave,
+      scrfsteps = mapnhanespa::cdf_rf_steps_bywave,
+      oaksteps = mapnhanespa::cdf_forest_steps_bywave,
+      vssteps = mapnhanespa::cdf_vs_original_steps_bywave,
+      vsrevsteps = mapnhanespa::cdf_vs_revised_steps_bywave
     )
   } else {
     cdf_tables <- list(
-      AC = cdf_ac,
-      PAXMTSM = cdf_mims,
-      scsslsteps = cdf_ssl_steps,
-      scrfsteps = cdf_rf_steps,
-      oaksteps = cdf_forest_steps,
-      vssteps = cdf_vs_original_steps,
-      vsrevsteps = cdf_vs_revised_steps
+      AC = mapnhanespa::cdf_ac,
+      PAXMTSM = mapnhanespa::cdf_mims,
+      scsslsteps = mapnhanespa::cdf_ssl_steps,
+      scrfsteps = mapnhanespa::cdf_rf_steps,
+      oaksteps = mapnhanespa::cdf_forest_steps,
+      vssteps = mapnhanespa::cdf_vs_original_steps,
+      vsrevsteps = mapnhanespa::cdf_vs_revised_steps
     )
   }
 
