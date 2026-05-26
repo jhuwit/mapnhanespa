@@ -8,3 +8,4 @@
 ^R/cdfs\.R$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^README\.Rmd$
