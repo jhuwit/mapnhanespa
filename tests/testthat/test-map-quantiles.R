@@ -9,6 +9,7 @@ test_that("participant data are mapped with combined and wave CDFs", {
 
   combined <- map_nhanes_pa_quantiles(data, id = "id")
   by_wave <- map_nhanes_pa_quantiles(data, id = "id", wave = "2013-2014")
+  by_wave2 <- map_nhanes_pa_quantiles(data, id = "id", wave = "2011-2012")
 
   expect_true(all(!is.na(combined$nhanes_quantile)))
   expect_true(all(!is.na(by_wave$nhanes_quantile)))
@@ -49,8 +50,8 @@ test_that("overall age and sex strata are supported when present", {
 
 test_that("age category input bypasses age bucketing", {
   data <- data.frame(
-    age_group = c("[20,30)", "Overall"),
-    sex = c("Overall", "Female"),
+    age_group = c("[20,30)", "[20,30)", "Overall", "Overall"),
+    sex = c("Overall", "Female", "Female", "Overall"),
     measure = c("mims", "mims"),
     value = c(15000, 15000)
   )
@@ -164,6 +165,49 @@ test_that("CDF table helper returns combined and wave-specific keys", {
   expect_setequal(unique(by_wave$data_release_cycle), c(7, 8))
 })
 
+test_that("CDF table helper fills missing strata defaults", {
+  combined <- mapnhanespa:::.nhanes_pa_cdf_table(
+    FALSE,
+    data.frame(measure = "mims", stringsAsFactors = FALSE)
+  )
+  by_wave <- mapnhanespa:::.nhanes_pa_cdf_table(
+    TRUE,
+    data.frame(
+      measure = "mims",
+      data_release_cycle = 7,
+      stringsAsFactors = FALSE
+    )
+  )
+
+  expect_equal(combined$cat_age, "Overall")
+  expect_equal(combined$gender, "Overall")
+  expect_equal(combined$measure, "PAXMTSM")
+  expect_true(is.function(combined$cdf[[1]]))
+
+  expect_equal(by_wave$cat_age, "Overall")
+  expect_equal(by_wave$gender, "Overall")
+  expect_equal(by_wave$data_release_cycle, 7L)
+  expect_equal(by_wave$measure, "PAXMTSM")
+  expect_true(is.function(by_wave$cdf[[1]]))
+})
+
+test_that("CDF table helper validates required key columns", {
+  expect_error(
+    mapnhanespa:::.nhanes_pa_cdf_table(
+      FALSE,
+      data.frame(cat_age = "[20,30)", stringsAsFactors = FALSE)
+    ),
+    "measure"
+  )
+  expect_error(
+    mapnhanespa:::.nhanes_pa_cdf_table(
+      TRUE,
+      data.frame(measure = "mims", stringsAsFactors = FALSE)
+    ),
+    "data_release_cycle"
+  )
+})
+
 test_that("precompute warms the cache for all supported CDFs", {
   mapnhanespa:::.nhanes_pa_cache$clear_cdf()
 
@@ -248,3 +292,4 @@ test_that("value_or_column returns columns or recycled scalar values", {
   expect_equal(mapnhanespa:::.value_or_column(data, "wave", 2), c(7, 8))
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
+

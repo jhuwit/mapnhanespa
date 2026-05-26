@@ -6,3 +6,4 @@
 ^\.positai$
 ^\.claude$
 ^R/cdfs\.R$
+^cran-comments\.md$
