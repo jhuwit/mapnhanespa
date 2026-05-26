@@ -16,9 +16,12 @@ knitr::opts_chunk$set(
 # mapnhanespa
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/jhuwit/mapnhanespa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jhuwit/mapnhanespa/actions/workflows/R-CMD-check.yaml)
+[![Codecov test coverage](https://codecov.io/gh/jhuwit/mapnhanespa/graph/badge.svg)](https://app.codecov.io/gh/jhuwit/mapnhanespa)
 <!-- badges: end -->
 
-The goal of mapnhanespa is to ...
+`mapnhanespa` maps physical activity summaries from a study sample onto
+population-level quantiles estimated from NHANES accelerometer data.
 
 ## Installation
 
@@ -31,25 +34,67 @@ pak::pak("jhuwit/mapnhanespa")
 
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
+Map one row per participant-measure observation with
+`map_nhanes_pa_quantiles()`:
 
 ```{r example}
 library(mapnhanespa)
-## basic example code
+
+study_data <- data.frame(
+  id = c("P01", "P02", "P03"),
+  age = c(25, 62, 84),
+  sex = c("Female", "Male", "Female"),
+  measure = c("mims", "ssl_steps", "AC"),
+  value = c(15000, 7500, 1000000)
+)
+
+map_nhanes_pa_quantiles(study_data, id = "id")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
+The `measure` column accepts common aliases:
 
-```{r cars}
-summary(cars)
+```{r aliases}
+measures <- data.frame(
+  id = c("P01", "P01", "P01"),
+  age = 25,
+  sex = "Female",
+  measure = c("mims", "PAXMTSM", "total_PAXMTSM"),
+  value = 15000
+)
+
+map_nhanes_pa_quantiles(measures, id = "id")
 ```
 
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
+By default, quantiles are evaluated against the combined 2011-2012 and
+2013-2014 NHANES waves:
 
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
+```{r combined}
+map_nhanes_pa_quantiles(study_data, id = "id")
 ```
 
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
+To map against a specific NHANES wave, provide `wave`:
+
+```{r wave}
+map_nhanes_pa_quantiles(study_data, id = "id", wave = "2013-2014")
+```
+
+You can also map without sex or age stratification:
+
+```{r strata}
+map_nhanes_pa_quantiles(study_data, id = "id", sex = NULL)
+map_nhanes_pa_quantiles(study_data, id = "id", age = NULL)
+```
+
+For a single participant-measure value, use `nhanes_pa_quantile()`:
+
+```{r single}
+nhanes_pa_quantile(
+  value = 15000,
+  age = 25,
+  sex = "Female",
+  measure = "mims"
+)
+```
+
+If a study already has age categories, pass the column name through
+`age_category`.
