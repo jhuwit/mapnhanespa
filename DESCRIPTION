@@ -8,7 +8,7 @@ Authors@R:
            email = "muschellij2@gmail.com",
            comment = c(ORCID = "0000-0001-6469-1750"))
 Description: Maps physical activity from the National Health and Nutrition 
-    Examination Survey (NHANES) study into population-based quantiles.
+    Examination Survey ('NHANES') study into population-based quantiles.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

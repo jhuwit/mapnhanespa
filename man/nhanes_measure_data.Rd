@@ -10,7 +10,7 @@ A data frame with 87619 rows and 9 variables:
 \item{SEQN}{ID variable}
 \item{data_release_cycle}{wave/data release cycle}
 \item{cat_age}{age category}
-\item{gender}{sex/gender desigination}
+\item{gender}{sex/gender designation}
 \item{wtmec4yr_adj_norm}{normalized weight for surveys}
 \item{masked_variance_pseudo_psu}{PSU - sampling unit}
 \item{masked_variance_pseudo_stratum}{sampling stratum}
