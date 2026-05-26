@@ -4,3 +4,4 @@ inst/doc
 mapnhanespa*.tar.gz
 mapnhanespa.Rcheck
 .positai
+data-raw/age_sex_*
