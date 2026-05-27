@@ -156,11 +156,13 @@ test_that("CDF table helper returns combined and wave-specific keys", {
 
   expect_setequal(
     unique(combined$measure),
-    c("AC", "PAXMTSM", "scsslsteps", "scrfsteps", "oaksteps", "vssteps", "vsrevsteps")
+    c("AC", "log10AC", "log10PAXMTSM", "oaksteps", "PAXMTSM", "scrfsteps",
+      "scsslsteps", "vsrevsteps", "vssteps")
   )
   expect_setequal(
     unique(by_wave$measure),
-    c("AC", "PAXMTSM", "scsslsteps", "scrfsteps", "oaksteps", "vssteps", "vsrevsteps")
+    c("AC", "log10AC", "log10PAXMTSM", "oaksteps", "PAXMTSM", "scrfsteps",
+      "scsslsteps", "vsrevsteps", "vssteps")
   )
   expect_setequal(unique(by_wave$data_release_cycle), c(7, 8))
 })
