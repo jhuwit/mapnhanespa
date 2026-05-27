@@ -14,6 +14,7 @@ A data frame with 87619 rows and 9 variables:
 \item{wtmec4yr_adj_norm}{normalized weight for surveys}
 \item{masked_variance_pseudo_psu}{PSU - sampling unit}
 \item{masked_variance_pseudo_stratum}{sampling stratum}
+\item{num_valid_days}{number of valid days of wear >= 1396 minutes}
 \item{measure}{measure that was calculated}
 \item{value}{value for the measure}
 }
