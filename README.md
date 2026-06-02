@@ -8,6 +8,8 @@
 [![R-CMD-check](https://github.com/jhuwit/mapnhanespa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jhuwit/mapnhanespa/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/jhuwit/mapnhanespa/graph/badge.svg)](https://app.codecov.io/gh/jhuwit/mapnhanespa)
+[![CRAN
+status](https://www.r-pkg.org/badges/version/mapnhanespa)](https://CRAN.R-project.org/package=mapnhanespa)
 <!-- badges: end -->
 
 `mapnhanespa` maps physical activity summaries from a study sample onto
