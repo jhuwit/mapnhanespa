@@ -443,6 +443,10 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   out[key %in% c(
     "oaksteps",
     "foreststeps",
+    "stepsoak",
+    "stepsforest",
+    "nstepsoak",
+    "nstepsforest",
     "stepsstepcountforest",
     "steps_stepcount_forest",
     "steps_stepcounts_forest"
