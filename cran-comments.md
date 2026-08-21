@@ -6,5 +6,4 @@
 
 ---
 
-## CRAN comments
-Updated magrittr pipe to be simply imported and not re-exported with issues with \value and \arguments.
+Removed magrittr dependency

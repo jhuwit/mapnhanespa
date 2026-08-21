@@ -1,6 +1,6 @@
 Package: mapnhanespa
 Title: Map Quantiles for Physical Activity from 'NHANES' 
-Version: 0.1.0
+Version: 0.2.0
 Authors@R: 
     person(given = "John",
            family = "Muschelli",
@@ -13,7 +13,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 Depends: 
-    R (>= 3.5)
+    R (>= 4.1.0)
 LazyData: true
 LazyDataCompression: xz
 URL: https://github.com/jhuwit/mapnhanespa
@@ -26,7 +26,6 @@ Config/testthat/edition: 3
 VignetteBuilder: knitr
 Imports: 
     dplyr,
-    magrittr,
     purrr,
     survey
 Config/roxygen2/version: 8.0.0

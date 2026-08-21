@@ -2,7 +2,7 @@ run_cdf = function(data) {
   wtmec4yr_adj_norm = NULL
   rm(list = c("wtmec4yr_adj_norm"))
   temp =
-    data %>%
+    data |>
     dplyr::mutate(wt_norm = wtmec4yr_adj_norm / mean(wtmec4yr_adj_norm))
 
   svy_design =
