@@ -12,6 +12,7 @@ test_that("participant data are mapped with combined and wave CDFs", {
   by_wave2 <- map_nhanes_pa_quantiles(data, id = "id", wave = "2011-2012")
 
   expect_true(all(!is.na(combined$nhanes_quantile)))
+  expect_equal(combined$age_category_pa_map, c("[20,30)", "[60,70)"))
   expect_true(all(!is.na(by_wave$nhanes_quantile)))
   expect_false(identical(combined$nhanes_quantile, by_wave$nhanes_quantile))
 })
@@ -46,6 +47,7 @@ test_that("overall age and sex strata are supported when present", {
 
   expect_true(all(!is.na(sex_overall$nhanes_quantile)))
   expect_true(all(!is.na(age_overall$nhanes_quantile)))
+  expect_equal(age_overall$age_category_pa_map, rep("Overall", 2))
 })
 
 test_that("age category input bypasses age bucketing", {
@@ -63,6 +65,7 @@ test_that("age category input bypasses age bucketing", {
   )
 
   expect_true(all(!is.na(result$nhanes_quantile)))
+  expect_equal(result$age_category_pa_map, data$age_group)
 })
 
 test_that("invalid inputs fail clearly", {
@@ -102,6 +105,7 @@ test_that("ages greater than 85 warn but map to oldest category", {
     "participant P1 has age 90 > 85"
   )
   expect_false(is.na(result$nhanes_quantile))
+  expect_equal(result$age_category_pa_map, "[80,85)")
 
   expect_warning(
     categories <- nhanes_pa_age_category(c(8, 25, 84, 90)),
@@ -249,7 +253,7 @@ test_that("standardization helpers normalize common aliases", {
     "steps_stepcount_ssl", "steps_stepcount_rf",
     "oaksteps", "steps_stepcount_forest",
     "steps_vs_original", "steps_vs_revised", "vssteps", "vsrevsteps",
-    "steps_sdt",
+    "steps_sdt", "total_activity_counts",
     "unknown"
   )
   expect_equal(
@@ -260,7 +264,7 @@ test_that("standardization helpers normalize common aliases", {
       "scsslsteps", "scsslsteps", NA, "scsslsteps", "scsslsteps",
       "scsslsteps", "scsslsteps", "scsslsteps",
        "scrfsteps", "oaksteps", "oaksteps",
-       "vssteps", "vsrevsteps", "vssteps", "vsrevsteps", "sdtsteps",
+       "vssteps", "vsrevsteps", "vssteps", "vsrevsteps", NA, "AC",
       NA
     )
   )
@@ -288,10 +292,38 @@ test_that("standardization helpers normalize common aliases", {
   )
 })
 
+test_that("all supported summaries have explicit measure mappings and CDFs", {
+  mapping <- nhanes_pa_measure_map()
+  expect_setequal(unique(mapping$summary), unique(nhanes_measure_data$measure))
+  expect_equal(mapnhanespa:::.standardize_measure(mapping$measure), mapping$summary)
+  expect_equal(mapnhanespa:::.standardize_measure(c("total_ac", "total_activity_counts")),
+               c("AC", "AC"))
+  expect_true(is.function(nhanes_pa_measure_cdf("total_activity_counts", 25, "Female")))
+
+  measures <- unique(mapping$summary)
+  values <- vapply(measures, function(x) {
+    median(nhanes_measure_data$value[nhanes_measure_data$measure == x], na.rm = TRUE)
+  }, numeric(1))
+  result <- map_nhanes_pa_quantiles(data.frame(
+    age = 25, sex = "Female", measure = measures, value = values
+  ))
+  expect_true(all(!is.na(result$nhanes_quantile)))
+})
+
+test_that("unmapped measures are listed once and yield missing quantiles", {
+  data <- data.frame(age = 25, sex = "Female",
+                     measure = c("unknown", "steps_sdt", "unknown", "mims"),
+                     value = c(100, 100, 100, 15000))
+  expect_warning(result <- map_nhanes_pa_quantiles(data),
+                 "'unknown', 'steps_sdt'")
+  expect_true(all(is.na(result$nhanes_quantile[1:3])))
+  expect_false(is.na(result$nhanes_quantile[4]))
+  expect_warning(nhanes_pa_measure_cdf("unknown"), "'unknown'")
+})
+
 test_that("value_or_column returns columns or recycled scalar values", {
   data <- data.frame(wave = c(7, 8))
 
   expect_equal(mapnhanespa:::.value_or_column(data, "wave", 2), c(7, 8))
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
-

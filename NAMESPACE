@@ -2,5 +2,7 @@
 
 export(map_nhanes_pa_quantiles)
 export(nhanes_pa_age_category)
+export(nhanes_pa_measure_cdf)
+export(nhanes_pa_measure_map)
 export(nhanes_pa_quantile)
 export(precompute_nhanes_pa_cdfs)

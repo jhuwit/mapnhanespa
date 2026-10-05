@@ -22,11 +22,8 @@ when \code{age_category} is supplied.}
 \item{sex}{Sex/gender. Common values such as \code{"M"}, \code{"male"}, \code{"F"}, and
 \code{"female"} are normalized. Set to \code{NULL} to use the sex/gender-overall CDFs.}
 
-\item{measure}{Physical activity measure. Supported aliases include
-\code{"mims"}, \code{"PAXMTSM"}, \code{"ssl_steps"}, \code{"scsslsteps"}, \code{"steps"},
-Verisense step aliases such as \code{"steps_stepcount_ssl"},
-\code{"steps_stepcount_rf"}, \code{"steps_vs_original"}, \code{"steps_vs_revised"},
-\code{"steps_sdt"}, and \code{"AC"}.}
+\item{measure}{Physical activity measure. See \code{\link[=nhanes_pa_measure_map]{nhanes_pa_measure_map()}}
+for every supported name and its CDF summary.}
 
 \item{wave}{Optional NHANES wave. Supported values are \code{7}, \code{8},
 \code{"2011-2012"}, and \code{"2013-2014"}.}

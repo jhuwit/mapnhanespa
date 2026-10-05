@@ -38,13 +38,19 @@ such as \code{"[20,30)"} or \code{"Overall"}. When supplied, it is used instead 
 \item{quantile_col}{Name of the output quantile column.}
 }
 \value{
-\code{data} with an added quantile column.
+\code{data} with an added quantile column and \code{age_category_pa_map}, the
+NHANES age category used to select the CDF. The category is \code{"Overall"}
+when \code{age = NULL} and is taken directly from \code{age_category} when supplied.
 }
 \description{
-\code{map_nhanes_pa_quantiles()} adds a population-level quantile column to a
+\code{map_nhanes_pa_quantiles()} adds a population-level quantile column and the
+NHANES age category used for each row to a
 participant-level data frame. Quantiles are evaluated from NHANES
 accelerometer cumulative distribution functions stratified by age category,
 sex/gender, measure, and optionally survey wave.
+Accepted measure names and their CDF summaries are listed by
+\code{\link[=nhanes_pa_measure_map]{nhanes_pa_measure_map()}}. Unmapped names return missing quantiles and are
+listed in a warning.
 }
 \examples{
 example_data <- data.frame(

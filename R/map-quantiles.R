@@ -1,9 +1,13 @@
 #' Map physical activity values to NHANES population quantiles
 #'
-#' `map_nhanes_pa_quantiles()` adds a population-level quantile column to a
+#' `map_nhanes_pa_quantiles()` adds a population-level quantile column and the
+#' NHANES age category used for each row to a
 #' participant-level data frame. Quantiles are evaluated from NHANES
 #' accelerometer cumulative distribution functions stratified by age category,
 #' sex/gender, measure, and optionally survey wave.
+#' Accepted measure names and their CDF summaries are listed by
+#' [nhanes_pa_measure_map()]. Unmapped names return missing quantiles and are
+#' listed in a warning.
 #'
 #' @param data A data frame with one row per participant-measure observation.
 #' @param age,sex,measure,value Column names in `data` containing age in years,
@@ -20,7 +24,9 @@
 #'   `age`.
 #' @param quantile_col Name of the output quantile column.
 #'
-#' @return `data` with an added quantile column.
+#' @return `data` with an added quantile column and `age_category_pa_map`, the
+#'   NHANES age category used to select the CDF. The category is `"Overall"`
+#'   when `age = NULL` and is taken directly from `age_category` when supplied.
 #' @export
 #'
 #' @examples
@@ -77,6 +83,7 @@ map_nhanes_pa_quantiles <- function(data,
   }
 
   out <- data
+  .warn_unmapped_measures(data[[measure]])
   if (is.null(age_category) && !is.null(age)) {
     .warn_ages_over_85(
       data[[age]],
@@ -103,6 +110,7 @@ map_nhanes_pa_quantiles <- function(data,
     },
     stringsAsFactors = FALSE
   )
+  out$age_category_pa_map <- key$cat_age
 
   if (is.null(wave)) {
     key$data_release_cycle <- NA_integer_
@@ -157,11 +165,8 @@ precompute_nhanes_pa_cdfs <- function() {
 #'   when `age_category` is supplied.
 #' @param sex Sex/gender. Common values such as `"M"`, `"male"`, `"F"`, and
 #'   `"female"` are normalized. Set to `NULL` to use the sex/gender-overall CDFs.
-#' @param measure Physical activity measure. Supported aliases include
-#'   `"mims"`, `"PAXMTSM"`, `"ssl_steps"`, `"scsslsteps"`, `"steps"`,
-#'   Verisense step aliases such as `"steps_stepcount_ssl"`,
-#'   `"steps_stepcount_rf"`, `"steps_vs_original"`, `"steps_vs_revised"`,
-#'   `"steps_sdt"`, and `"AC"`.
+#' @param measure Physical activity measure. See [nhanes_pa_measure_map()]
+#'   for every supported name and its CDF summary.
 #' @param wave Optional NHANES wave. Supported values are `7`, `8`,
 #'   `"2011-2012"`, and `"2013-2014"`.
 #' @param age_category Optional NHANES age category such as `"[20,30)"` or
@@ -412,61 +417,6 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   cdf
 }
 
-.standardize_measure <- function(measure) {
-  x <- trimws(as.character(measure))
-  key <- gsub("[^a-z0-9]+", "", tolower(x))
-
-  out <- rep(NA_character_, length(key))
-  out[key %in% c("ac", "activitycounts", "counts", "totalac")] <- "AC"
-  out[key %in% c("log10ac", "log10activitycounts", "log10counts", "totallog10ac")] <- "log10AC"
-  out[key %in% c("mims", "paxmtsm", "totalpaxmtsm", "mimsunit")] <- "PAXMTSM"
-  out[key %in% c("log10mims", "log10paxmtsm", "totallog10paxmtsm", "log10mimsunit")] <- "log10PAXMTSM"
-  out[key %in% c(
-    "sslsteps", "scsslsteps",
-    "totalsslsteps", "totalscsslsteps",
-    "stepsstepcountssl",
-    "steps_stepcount_ssl",
-    "steps_stepcounts_ssl"
-  )] <- "scsslsteps"
-  out[key %in% c(
-    "sslsteps", "scsslsteps", "sslstepcount", "sslstepcounts",
-    "totalsslsteps", "totalscsslsteps",
-    "stepsstepcountssl"
-  )] <- "scsslsteps"
-  out[key %in% c(
-    "rfsteps", "scrfsteps", "rfstepcount", "rfstepcounts",
-    "totalrfsteps", "totalscrfsteps",
-    "stepsstepcountrf",
-    "steps_stepcount_rf",
-    "steps_stepcounts_rf"
-  )] <- "scrfsteps"
-  out[key %in% c(
-    "oaksteps",
-    "foreststeps",
-    "stepsoak",
-    "stepsforest",
-    "nstepsoak",
-    "nstepsforest",
-    "stepsstepcountforest",
-    "steps_stepcount_forest",
-    "steps_stepcounts_forest"
-  )] <- "oaksteps"
-  out[key %in% c(
-    "vssteps",
-    "vsstepsoriginal",
-    "stepsvsoriginal"
-  )] <- "vssteps"
-  out[key %in% c(
-    "vsrevsteps",
-    "vsstepsrevised",
-    "stepsvsrevised"
-  )] <- "vsrevsteps"
-  out[key %in% c(
-    "stepssdt"
-  )] <- "sdtsteps"
-  out
-}
-
 .standardize_gender <- function(gender) {
   x <- trimws(as.character(gender))
   key <- tolower(x)
@@ -520,5 +470,3 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 })
 
 lockBinding(".nhanes_pa_cache", environment())
-
-
