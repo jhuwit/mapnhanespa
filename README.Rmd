@@ -130,3 +130,7 @@ nhanes_pa_quantile(
 
 If a study already has age categories, pass the column name through
 `age_category`.
+
+## Funding acknowledgement
+
+This work was supported by NIH P30AG021334 and the Johns Hopkins Older Americans Independence Center (OAIC) Pepper Center grant.
