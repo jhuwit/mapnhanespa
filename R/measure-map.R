@@ -91,7 +91,7 @@ nhanes_pa_measure_cdf <- function(measure, age = NULL, sex = NULL,
   if (length(missing)) {
     missing[is.na(missing)] <- "NA"
     warning("No NHANES CDF mapping for measure(s): ",
-            paste(shQuote(missing), collapse = ", "), call. = FALSE)
+            paste(sQuote(missing, q = FALSE), collapse = ", "), call. = FALSE)
   }
   invisible(NULL)
 }
