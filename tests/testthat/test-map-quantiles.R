@@ -327,3 +327,17 @@ test_that("value_or_column returns columns or recycled scalar values", {
   expect_equal(mapnhanespa:::.value_or_column(data, "wave", 2), c(7, 8))
   expect_equal(mapnhanespa:::.value_or_column(data, "2011-2012", 2), rep("2011-2012", 2))
 })
+
+test_that("nhanes_pa_measure_cdf handles overall, category, and invalid inputs", {
+  expect_true(is.function(nhanes_pa_measure_cdf("mims")))
+  expect_true(is.function(nhanes_pa_measure_cdf("mims", age_category = "[20,30)",
+                                                sex = "Male", wave = 7)))
+
+  expect_error(nhanes_pa_measure_cdf(c("mims", "AC")), "length one")
+  expect_error(nhanes_pa_measure_cdf("mims", age = c(25, 35)), "must be scalar")
+  expect_error(nhanes_pa_measure_cdf("mims", wave = c(7, 8)), "must be scalar")
+
+  expect_identical(nhanes_pa_measure_cdf("mims", age = -1), NA_real_)
+  expect_identical(nhanes_pa_measure_cdf("mims", sex = "unknown"), NA_real_)
+  expect_identical(nhanes_pa_measure_cdf("mims", wave = 3), NA_real_)
+})
