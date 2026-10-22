@@ -12,6 +12,14 @@
 * Expanded the README and vignette examples to cover all nine supported
   summaries while retaining the three-participant example.
 
+* Added Lily Koffman as an author and references to Koffman, Crainiceanu,
+  and Muschelli (2025) and the Koffman and Muschelli (2025) PhysioNet data
+  in the package description.
+
+# mapnhanespa 0.2.0
+
+* Removed the magrittr dependency.
+
 # mapnhanespa 0.1.0
 
 * `map_nhanes_quantiles` now maps things to the data.
