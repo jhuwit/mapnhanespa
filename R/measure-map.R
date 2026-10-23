@@ -10,7 +10,7 @@
 nhanes_pa_measure_map <- function() {
   aliases <- list(
     AC = c("AC", "activity_counts", "activitycounts", "counts", "total_AC",
-           "total_activity_counts"),
+           "total_activity_counts", "total_counts"),
     log10AC = c("log10AC", "log10_activity_counts", "log10_counts", "total_log10AC"),
     PAXMTSM = c("PAXMTSM", "mims", "mims_unit", "total_PAXMTSM"),
     log10PAXMTSM = c("log10PAXMTSM", "log10_mims", "total_log10PAXMTSM",

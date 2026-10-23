@@ -296,8 +296,8 @@ test_that("all supported summaries have explicit measure mappings and CDFs", {
   mapping <- nhanes_pa_measure_map()
   expect_setequal(unique(mapping$summary), unique(nhanes_measure_data$measure))
   expect_equal(mapnhanespa:::.standardize_measure(mapping$measure), mapping$summary)
-  expect_equal(mapnhanespa:::.standardize_measure(c("total_ac", "total_activity_counts")),
-               c("AC", "AC"))
+  expect_equal(mapnhanespa:::.standardize_measure(c("total_ac", "total_activity_counts", "total_counts")),
+               c("AC", "AC", "AC"))
   expect_true(is.function(nhanes_pa_measure_cdf("total_activity_counts", 25, "Female")))
 
   measures <- unique(mapping$summary)
