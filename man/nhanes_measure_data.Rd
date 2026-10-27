@@ -14,7 +14,7 @@ A data frame with 87619 rows and 9 variables:
 \item{wtmec4yr_adj_norm}{normalized weight for surveys}
 \item{masked_variance_pseudo_psu}{PSU - sampling unit}
 \item{masked_variance_pseudo_stratum}{sampling stratum}
-\item{num_valid_days}{number of valid days of wear >= 1396 minutes}
+\item{num_valid_days}{number of valid days of wear (e.g. 1368 minutes, see Details)}
 \item{measure}{measure that was calculated}
 \item{value}{value for the measure}
 }
@@ -27,5 +27,20 @@ nhanes_measure_data
 }
 \description{
 NHANES PA data
+}
+\details{
+Valid days are defined as in Koffman, Crainiceanu, and Muschelli (2025).
+A day is valid if (1) at least 1,368 minutes (95\% of a full day) were
+classified as wake wear, sleep wear, or unknown and had no data quality
+flags; (2) at least 420 minutes were classified as wake wear; and (3) at
+least 420 minutes had non-zero MIMS. Only participants with at least
+3 valid days are included.
+}
+\references{
+Koffman L, Crainiceanu C, Muschelli J (2025). Comparing Step Counting
+Algorithms for High-Resolution Wrist Accelerometry Data in NHANES
+2011-2014. \emph{Medicine & Science in Sports & Exercise}, 57(4), 746-755.
+\doi{10.1249/MSS.0000000000003616}. PMID: 39589008,
+\url{https://pubmed.ncbi.nlm.nih.gov/39589008/}.
 }
 \keyword{datasets}
