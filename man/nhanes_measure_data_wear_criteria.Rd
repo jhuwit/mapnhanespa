@@ -49,10 +49,12 @@ they have at least \code{min_valid_days} valid days. Survey weights were
 re-adjusted for each criterion, so rows from different criteria should
 never be combined.
 
-The \code{"wear1368_days3"} criterion matches \link{nhanes_measure_data}, except for
-two participants (SEQN 69762 and 80584) who each differ by one valid day.
-This is because the PhysioNet \code{PAXFLGSM} quality-flag file omits some flags
-present in the original NHANES data. The package default
+The \code{"wear1368_days3"} criterion matches \link{nhanes_measure_data} up to
+floating-point rounding (relative differences of about 1e-16 in some
+\code{log10AC} and \code{log10PAXMTSM} values), except for two participants
+(SEQN 69762 and 80584) who each differ by one valid day. This is because
+the PhysioNet \code{PAXFLGSM} quality-flag file omits some flags present in the
+original NHANES data. The package default
 (\code{min_wear_minutes = 1368}, \code{min_valid_days = 3}) therefore continues to use
 \link{nhanes_measure_data}, so earlier results are unchanged.
 }

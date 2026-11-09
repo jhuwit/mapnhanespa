@@ -69,10 +69,12 @@
 #' re-adjusted for each criterion, so rows from different criteria should
 #' never be combined.
 #'
-#' The `"wear1368_days3"` criterion matches [nhanes_measure_data], except for
-#' two participants (SEQN 69762 and 80584) who each differ by one valid day.
-#' This is because the PhysioNet `PAXFLGSM` quality-flag file omits some flags
-#' present in the original NHANES data. The package default
+#' The `"wear1368_days3"` criterion matches [nhanes_measure_data] up to
+#' floating-point rounding (relative differences of about 1e-16 in some
+#' `log10AC` and `log10PAXMTSM` values), except for two participants
+#' (SEQN 69762 and 80584) who each differ by one valid day. This is because
+#' the PhysioNet `PAXFLGSM` quality-flag file omits some flags present in the
+#' original NHANES data. The package default
 #' (`min_wear_minutes = 1368`, `min_valid_days = 3`) therefore continues to use
 #' [nhanes_measure_data], so earlier results are unchanged.
 #' @references
