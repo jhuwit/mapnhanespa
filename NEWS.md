@@ -1,4 +1,4 @@
-# mapnhanespa (development version)
+# mapnhanespa 0.4.0
 
 * Added support for alternative accelerometer wear-time inclusion criteria, so
   study data can be mapped to NHANES quantiles that match the study's own

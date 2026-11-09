@@ -1,6 +1,6 @@
 Package: mapnhanespa
 Title: Map Quantiles for Physical Activity from 'NHANES' 
-Version: 0.3.0.9000
+Version: 0.4.0
 Authors@R: 
     c(
     person(given = "John",
