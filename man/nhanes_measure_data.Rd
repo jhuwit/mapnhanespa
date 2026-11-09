@@ -40,7 +40,6 @@ least 420 minutes had non-zero MIMS. Only participants with at least
 Koffman L, Crainiceanu C, Muschelli J (2025). Comparing Step Counting
 Algorithms for High-Resolution Wrist Accelerometry Data in NHANES
 2011-2014. \emph{Medicine & Science in Sports & Exercise}, 57(4), 746-755.
-\doi{10.1249/MSS.0000000000003616}. PMID: 39589008,
-\url{https://pubmed.ncbi.nlm.nih.gov/39589008/}.
+\doi{10.1249/MSS.0000000000003616}. PMID: 39589008.
 }
 \keyword{datasets}
