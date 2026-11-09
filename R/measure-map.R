@@ -39,20 +39,25 @@ nhanes_pa_measure_map <- function() {
 #' Select the NHANES CDF for a measure
 #'
 #' Uses the explicit aliases in [nhanes_pa_measure_map()] to select the CDF
-#' calculated from the corresponding summary in `nhanes_measure_data`.
+#' calculated from the corresponding summary in `nhanes_measure_data`, or in
+#' `nhanes_measure_data_wear_criteria` for a non-default wear-time criterion.
 #'
 #' @param measure A single supported measure name.
 #' @param age Age in years, or `NULL` for the overall age CDF.
 #' @param sex Sex/gender, or `NULL` for the overall sex/gender CDF.
 #' @param wave Optional NHANES wave (`7`, `8`, `"2011-2012"`, or `"2013-2014"`).
 #' @param age_category Optional NHANES age category, used instead of `age`.
+#' @inheritParams map_nhanes_pa_quantiles
 #' @return A CDF function, or `NA_real_` if no CDF is available.
 #' @export
 nhanes_pa_measure_cdf <- function(measure, age = NULL, sex = NULL,
-                                  wave = NULL, age_category = NULL) {
+                                  wave = NULL, age_category = NULL,
+                                  min_wear_minutes = 1368,
+                                  min_valid_days = 3) {
   if (length(measure) != 1L) {
     stop("`measure` must have length one.", call. = FALSE)
   }
+  criterion <- .resolve_wear_criterion(min_wear_minutes, min_valid_days)
   summary <- .standardize_measure(measure)
   if (is.na(summary)) {
     .warn_unmapped_measures(measure)
@@ -74,7 +79,7 @@ nhanes_pa_measure_cdf <- function(measure, age = NULL, sex = NULL,
   if (is.na(category) || is.na(gender) || (!is.null(cycle) && is.na(cycle))) {
     return(NA_real_)
   }
-  .nhanes_pa_cdf_one(summary, category, gender, cycle)
+  .nhanes_pa_cdf_one(summary, category, gender, cycle, criterion = criterion)
 }
 
 .standardize_measure <- function(measure) {

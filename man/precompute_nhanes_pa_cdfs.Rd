@@ -4,7 +4,18 @@
 \alias{precompute_nhanes_pa_cdfs}
 \title{Precompute and cache NHANES PA CDFs}
 \usage{
-precompute_nhanes_pa_cdfs()
+precompute_nhanes_pa_cdfs(min_wear_minutes = 1368, min_valid_days = 3)
+}
+\arguments{
+\item{min_wear_minutes, min_valid_days}{Accelerometer wear-time inclusion
+criterion for the NHANES reference population: the minimum minutes of
+wear for a valid day (\code{600}, \code{960}, \code{1296}, \code{1368}, or \code{1440}) and the
+minimum number of valid days (\code{1}, \code{3}, or \code{4}). The defaults
+(\code{1368} minutes, \code{3} days) use \link{nhanes_measure_data} and give the same
+results as earlier versions of the package. Other values use the matching
+criterion in \link{nhanes_measure_data_wear_criteria}, with survey weights
+adjusted for that criterion. Choose the criterion that matches the
+inclusion rules applied to \code{data}. See \code{\link[=nhanes_pa_wear_criteria]{nhanes_pa_wear_criteria()}}.}
 }
 \value{
 Invisibly returns a list with the cached combined and by-wave tables.
@@ -13,5 +24,6 @@ Invisibly returns a list with the cached combined and by-wave tables.
 Builds every supported CDF combination and stores the result in the internal
 cache. This covers combined and by-wave CDFs, age-specific and
 age-overall strata, sex/gender-specific and sex/gender-overall strata, and
-the overall-overall combination for each supported measure.
+the overall-overall combination for each supported measure. CDFs are
+cached separately for each wear-time criterion.
 }

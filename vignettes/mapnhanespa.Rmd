@@ -147,6 +147,45 @@ map_nhanes_pa_quantiles(study_data, id = "id", sex = NULL, wave = 7)
 The package data do not contain a stratum that is overall for both age and sex
 or gender. Calls that omit both age and sex therefore produce an error.
 
+## Wear-time Inclusion Criteria
+
+The default NHANES reference follows the primary analysis of
+@koffman2025stepcount. A day is valid if it has at least 1,368 minutes (95% of
+a full day) of non-flagged wear, at least 420 minutes of wake wear, and at
+least 420 minutes of non-zero MIMS. Participants need at least 3 valid days.
+
+Studies often use other rules, and a quantile is most meaningful when the
+study and the reference use the same rules. The `min_wear_minutes` and
+`min_valid_days` arguments select a reference built with a different
+criterion. Survey weights were re-adjusted separately for each criterion.
+The available criteria are listed by `nhanes_pa_wear_criteria()`:
+
+```{r}
+criteria <- nhanes_pa_wear_criteria()
+criteria[, c("criterion", "min_wear_hours", "pct_of_day", "min_valid_days",
+             "default")]
+unique(criteria[, c("min_wear_minutes", "note")])
+```
+
+For example, a study that used the 10-hour, 4-day hip-worn NHANES 2003-2006
+rule can compare the same value under both references:
+
+```{r}
+compare <- rbind(
+  cbind(criterion = "1368 min, 3 days (default)",
+        map_nhanes_pa_quantiles(study_data, id = "id")),
+  cbind(criterion = "600 min, 4 days",
+        map_nhanes_pa_quantiles(study_data, id = "id",
+                                min_wear_minutes = 600, min_valid_days = 4))
+)
+compare[order(compare$id), c("id", "measure", "value", "criterion",
+                             "nhanes_quantile")]
+```
+
+The default criterion uses `nhanes_measure_data`, so results match earlier
+versions of the package. Every other criterion uses the matching subset of
+`nhanes_measure_data_wear_criteria`.
+
 ## Single Values
 
 For a single participant-measure value, use `nhanes_pa_quantile()`.
