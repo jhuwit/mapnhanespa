@@ -23,6 +23,15 @@
 #'   such as `"[20,30)"` or `"Overall"`. When supplied, it is used instead of
 #'   `age`.
 #' @param quantile_col Name of the output quantile column.
+#' @param min_wear_minutes,min_valid_days Accelerometer wear-time inclusion
+#'   criterion for the NHANES reference population: the minimum minutes of
+#'   wear for a valid day (`600`, `960`, `1296`, `1368`, or `1440`) and the
+#'   minimum number of valid days (`1`, `3`, or `4`). The defaults
+#'   (`1368` minutes, `3` days) use [nhanes_measure_data] and give the same
+#'   results as earlier versions of the package. Other values use the matching
+#'   criterion in [nhanes_measure_data_wear_criteria], with survey weights
+#'   adjusted for that criterion. Choose the criterion that matches the
+#'   inclusion rules applied to `data`. See [nhanes_pa_wear_criteria()].
 #'
 #' @return `data` with an added quantile column and `age_category_pa_map`, the
 #'   NHANES age category used to select the CDF. The category is `"Overall"`
@@ -45,6 +54,10 @@
 #' map_nhanes_pa_quantiles(example_data, age = NULL, wave = "2011-2012")
 #' map_nhanes_pa_quantiles(example_data, age = NULL, sex = NULL)
 #'
+#' # NHANES reference built with a 10-hour, 4-day wear criterion
+#' map_nhanes_pa_quantiles(example_data, min_wear_minutes = 600,
+#'                         min_valid_days = 4)
+#'
 map_nhanes_pa_quantiles <- function(data,
                                     id = NULL,
                                     age = "age",
@@ -53,10 +66,13 @@ map_nhanes_pa_quantiles <- function(data,
                                     value = "value",
                                     wave = NULL,
                                     age_category = NULL,
-                                    quantile_col = "nhanes_quantile") {
+                                    quantile_col = "nhanes_quantile",
+                                    min_wear_minutes = 1368,
+                                    min_valid_days = 3) {
   if (!is.data.frame(data)) {
     stop("`data` must be a data frame.", call. = FALSE)
   }
+  criterion <- .resolve_wear_criterion(min_wear_minutes, min_valid_days)
 
   required <- c(measure, value)
   if (!is.null(id)) {
@@ -122,7 +138,8 @@ map_nhanes_pa_quantiles <- function(data,
 
   cdf_table <- .nhanes_pa_cdf_table(
     by_wave = !is.null(wave),
-    keys = unique(key[, by_cols, drop = FALSE])
+    keys = unique(key[, by_cols, drop = FALSE]),
+    criterion = criterion
   )
 
   matched <- dplyr::left_join(
@@ -148,13 +165,17 @@ map_nhanes_pa_quantiles <- function(data,
 #' Builds every supported CDF combination and stores the result in the internal
 #' cache. This covers combined and by-wave CDFs, age-specific and
 #' age-overall strata, sex/gender-specific and sex/gender-overall strata, and
-#' the overall-overall combination for each supported measure.
+#' the overall-overall combination for each supported measure. CDFs are
+#' cached separately for each wear-time criterion.
 #'
+#' @inheritParams map_nhanes_pa_quantiles
 #' @return Invisibly returns a list with the cached combined and by-wave tables.
 #' @export
-precompute_nhanes_pa_cdfs <- function() {
-  combined <- .nhanes_pa_cdf_table(by_wave = FALSE)
-  by_wave <- .nhanes_pa_cdf_table(by_wave = TRUE)
+precompute_nhanes_pa_cdfs <- function(min_wear_minutes = 1368,
+                                      min_valid_days = 3) {
+  criterion <- .resolve_wear_criterion(min_wear_minutes, min_valid_days)
+  combined <- .nhanes_pa_cdf_table(by_wave = FALSE, criterion = criterion)
+  by_wave <- .nhanes_pa_cdf_table(by_wave = TRUE, criterion = criterion)
   invisible(list(combined = combined, by_wave = by_wave))
 }
 
@@ -171,6 +192,7 @@ precompute_nhanes_pa_cdfs <- function() {
 #'   `"2011-2012"`, and `"2013-2014"`.
 #' @param age_category Optional NHANES age category such as `"[20,30)"` or
 #'   `"Overall"`.
+#' @inheritParams map_nhanes_pa_quantiles
 #'
 #' @return A numeric quantile in `[0, 1]`, or `NA_real_` when no matching CDF is
 #'   available.
@@ -191,12 +213,24 @@ precompute_nhanes_pa_cdfs <- function() {
 #'   measure = "mims",
 #'   wave = "2013-2014"
 #' )
+#'
+#' # Same value against a complete-wear (24 h), 1-day reference
+#' nhanes_pa_quantile(
+#'   value = 15000,
+#'   age = 25,
+#'   sex = "Female",
+#'   measure = "mims",
+#'   min_wear_minutes = 1440,
+#'   min_valid_days = 1
+#' )
 nhanes_pa_quantile <- function(value,
                                age = NULL,
                                sex = NULL,
                                measure,
                                wave = NULL,
-                               age_category = NULL) {
+                               age_category = NULL,
+                               min_wear_minutes = 1368,
+                               min_valid_days = 3) {
   data <- data.frame(
     age = if (is.null(age)) "Overall" else age,
     sex = if (is.null(sex)) "Overall" else sex,
@@ -219,7 +253,9 @@ nhanes_pa_quantile <- function(value,
     measure = "measure",
     value = "value",
     wave = if (is.null(wave)) NULL else "wave",
-    age_category = if (is.null(age_category)) NULL else "age_category"
+    age_category = if (is.null(age_category)) NULL else "age_category",
+    min_wear_minutes = min_wear_minutes,
+    min_valid_days = min_valid_days
   )
 
   result$nhanes_quantile
@@ -288,9 +324,11 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   as.numeric(cdf(value))
 }
 
-.nhanes_pa_cdf_table <- function(by_wave = FALSE, keys = NULL) {
+# `criterion` is NULL for the default data (`nhanes_measure_data`) or a label
+# from `nhanes_pa_wear_criteria()$criterion`.
+.nhanes_pa_cdf_table <- function(by_wave = FALSE, keys = NULL, criterion = NULL) {
   if (is.null(keys)) {
-    keys <- .nhanes_pa_cdf_keys(by_wave = by_wave)
+    keys <- .nhanes_pa_cdf_keys(by_wave = by_wave, criterion = criterion)
   } else {
     keys <- as.data.frame(keys, stringsAsFactors = FALSE)
     if (!"measure" %in% names(keys)) {
@@ -332,7 +370,8 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
           measure = measure,
           cat_age = cat_age,
           gender = gender,
-          data_release_cycle = data_release_cycle
+          data_release_cycle = data_release_cycle,
+          criterion = criterion
         )
       }
     )
@@ -343,7 +382,8 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
         .nhanes_pa_cdf_one(
           measure = measure,
           cat_age = cat_age,
-          gender = gender
+          gender = gender,
+          criterion = criterion
         )
       }
     )
@@ -352,16 +392,22 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
   keys
 }
 
-.nhanes_pa_cdf_keys <- function(by_wave = FALSE) {
-  measures <- sort(unique(.standardize_measure(mapnhanespa::nhanes_measure_data$measure)))
-  ages <- sort(unique(as.character(mapnhanespa::nhanes_measure_data$cat_age)))
-  genders <- sort(unique(.standardize_gender(mapnhanespa::nhanes_measure_data$gender)))
+.nhanes_pa_cdf_keys <- function(by_wave = FALSE, criterion = NULL) {
+  if (is.null(criterion)) {
+    data <- mapnhanespa::nhanes_measure_data
+    measures <- sort(unique(.standardize_measure(data$measure)))
+  } else {
+    data <- .nhanes_pa_criterion_data(criterion)
+    measures <- sort(intersect(names(data), nhanes_pa_measure_map()$summary))
+  }
+  ages <- sort(unique(as.character(data$cat_age)))
+  genders <- sort(unique(.standardize_gender(data$gender)))
 
   ages <- unique(c(ages, "Overall"))
   genders <- unique(c(genders, "Overall"))
 
   if (by_wave) {
-    waves <- sort(unique(mapnhanespa::nhanes_measure_data$data_release_cycle))
+    waves <- sort(unique(data$data_release_cycle))
     expand.grid(
       measure = measures,
       data_release_cycle = waves,
@@ -382,8 +428,12 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 .nhanes_pa_cdf_one <- function(measure,
                                cat_age,
                                gender,
-                               data_release_cycle = NULL) {
+                               data_release_cycle = NULL,
+                               criterion = NULL) {
+  # The criterion is part of the key so CDFs from different wear-time
+  # criteria never collide in the cache.
   key <- paste(
+    if (is.null(criterion)) "default" else criterion,
     if (is.null(data_release_cycle)) "combined" else paste0("wave-", data_release_cycle),
     measure,
     cat_age,
@@ -395,8 +445,16 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
     return(.nhanes_pa_cache$get_cdf(key))
   }
 
-  data <- mapnhanespa::nhanes_measure_data
-  data <- data[data$measure == measure, , drop = FALSE]
+  if (is.null(criterion)) {
+    data <- mapnhanespa::nhanes_measure_data
+    data <- data[data$measure == measure, , drop = FALSE]
+  } else {
+    data <- .nhanes_pa_criterion_data(criterion)
+    if (!measure %in% names(data)) {
+      data <- data[0, , drop = FALSE]
+    }
+    data$value <- data[[measure]]
+  }
   if (!is.null(data_release_cycle)) {
     data <- data[data$data_release_cycle == data_release_cycle, , drop = FALSE]
   }
@@ -415,6 +473,13 @@ nhanes_pa_age_category <- function(age, warn = TRUE) {
 
   .nhanes_pa_cache$set_cdf(key, cdf)
   cdf
+}
+
+# Rows of `nhanes_measure_data_wear_criteria` for one criterion. Never mixes
+# rows across criteria, because survey weights are criterion-specific.
+.nhanes_pa_criterion_data <- function(criterion) {
+  data <- mapnhanespa::nhanes_measure_data_wear_criteria
+  data[data$criterion == criterion, , drop = FALSE]
 }
 
 .standardize_gender <- function(gender) {

@@ -131,6 +131,33 @@ nhanes_pa_quantile(
 If a study already has age categories, pass the column name through
 `age_category`.
 
+## Wear-time inclusion criteria
+
+By default, the NHANES reference includes participants with at least 3 valid
+days of at least 1,368 wear minutes (95% of the day). If your study used
+different inclusion rules, choose the matching criterion with
+`min_wear_minutes` and `min_valid_days`. The available criteria are listed by
+`nhanes_pa_wear_criteria()`:
+
+```{r wear-criteria}
+nhanes_pa_wear_criteria()[, c("criterion", "min_wear_minutes",
+                              "min_valid_days", "default")]
+```
+
+The same value can map to a different quantile under a different criterion,
+because the reference population and its survey weights change:
+
+```{r wear-compare}
+data.frame(
+  criterion = c("1368 min, 3 days (default)", "600 min, 4 days"),
+  nhanes_quantile = c(
+    nhanes_pa_quantile(15000, age = 25, sex = "Female", measure = "mims"),
+    nhanes_pa_quantile(15000, age = 25, sex = "Female", measure = "mims",
+                       min_wear_minutes = 600, min_valid_days = 4)
+  )
+)
+```
+
 ## Funding acknowledgement
 
 This work was supported by NIH P30AG021334 and the Johns Hopkins Older Americans Independence Center (OAIC) Pepper Center grant.

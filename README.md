@@ -100,51 +100,52 @@ nhanes_pa_measure_map()
 #> 4                   counts           AC
 #> 5                 total_AC           AC
 #> 6    total_activity_counts           AC
-#> 7                  log10AC      log10AC
-#> 8    log10_activity_counts      log10AC
-#> 9             log10_counts      log10AC
-#> 10           total_log10AC      log10AC
-#> 11                 PAXMTSM      PAXMTSM
-#> 12                    mims      PAXMTSM
-#> 13               mims_unit      PAXMTSM
-#> 14           total_PAXMTSM      PAXMTSM
-#> 15            log10PAXMTSM log10PAXMTSM
-#> 16              log10_mims log10PAXMTSM
-#> 17      total_log10PAXMTSM log10PAXMTSM
-#> 18         log10_mims_unit log10PAXMTSM
-#> 19              scsslsteps   scsslsteps
-#> 20               ssl_steps   scsslsteps
-#> 21            sslstepcount   scsslsteps
-#> 22           sslstepcounts   scsslsteps
-#> 23         total_ssl_steps   scsslsteps
-#> 24        total_scsslsteps   scsslsteps
-#> 25     steps_stepcount_ssl   scsslsteps
-#> 26    steps_stepcounts_ssl   scsslsteps
-#> 27               scrfsteps    scrfsteps
-#> 28                rf_steps    scrfsteps
-#> 29             rfstepcount    scrfsteps
-#> 30            rfstepcounts    scrfsteps
-#> 31          total_rf_steps    scrfsteps
-#> 32         total_scrfsteps    scrfsteps
-#> 33      steps_stepcount_rf    scrfsteps
-#> 34     steps_stepcounts_rf    scrfsteps
-#> 35                oaksteps     oaksteps
-#> 36             foreststeps     oaksteps
-#> 37               steps_oak     oaksteps
-#> 38            steps_forest     oaksteps
-#> 39              nsteps_oak     oaksteps
-#> 40           nsteps_forest     oaksteps
-#> 41          total_oaksteps     oaksteps
-#> 42  steps_stepcount_forest     oaksteps
-#> 43 steps_stepcounts_forest     oaksteps
-#> 44                 vssteps      vssteps
-#> 45        vssteps_original      vssteps
-#> 46       steps_vs_original      vssteps
-#> 47           total_vssteps      vssteps
-#> 48              vsrevsteps   vsrevsteps
-#> 49         vssteps_revised   vsrevsteps
-#> 50        steps_vs_revised   vsrevsteps
-#> 51        total_vsrevsteps   vsrevsteps
+#> 7             total_counts           AC
+#> 8                  log10AC      log10AC
+#> 9    log10_activity_counts      log10AC
+#> 10            log10_counts      log10AC
+#> 11           total_log10AC      log10AC
+#> 12                 PAXMTSM      PAXMTSM
+#> 13                    mims      PAXMTSM
+#> 14               mims_unit      PAXMTSM
+#> 15           total_PAXMTSM      PAXMTSM
+#> 16            log10PAXMTSM log10PAXMTSM
+#> 17              log10_mims log10PAXMTSM
+#> 18      total_log10PAXMTSM log10PAXMTSM
+#> 19         log10_mims_unit log10PAXMTSM
+#> 20              scsslsteps   scsslsteps
+#> 21               ssl_steps   scsslsteps
+#> 22            sslstepcount   scsslsteps
+#> 23           sslstepcounts   scsslsteps
+#> 24         total_ssl_steps   scsslsteps
+#> 25        total_scsslsteps   scsslsteps
+#> 26     steps_stepcount_ssl   scsslsteps
+#> 27    steps_stepcounts_ssl   scsslsteps
+#> 28               scrfsteps    scrfsteps
+#> 29                rf_steps    scrfsteps
+#> 30             rfstepcount    scrfsteps
+#> 31            rfstepcounts    scrfsteps
+#> 32          total_rf_steps    scrfsteps
+#> 33         total_scrfsteps    scrfsteps
+#> 34      steps_stepcount_rf    scrfsteps
+#> 35     steps_stepcounts_rf    scrfsteps
+#> 36                oaksteps     oaksteps
+#> 37             foreststeps     oaksteps
+#> 38               steps_oak     oaksteps
+#> 39            steps_forest     oaksteps
+#> 40              nsteps_oak     oaksteps
+#> 41           nsteps_forest     oaksteps
+#> 42          total_oaksteps     oaksteps
+#> 43  steps_stepcount_forest     oaksteps
+#> 44 steps_stepcounts_forest     oaksteps
+#> 45                 vssteps      vssteps
+#> 46        vssteps_original      vssteps
+#> 47       steps_vs_original      vssteps
+#> 48           total_vssteps      vssteps
+#> 49              vsrevsteps   vsrevsteps
+#> 50         vssteps_revised   vsrevsteps
+#> 51        steps_vs_revised   vsrevsteps
+#> 52        total_vsrevsteps   vsrevsteps
 ```
 
 The `measure` column accepts common aliases, including `total_ac` and
@@ -226,6 +227,53 @@ nhanes_pa_quantile(
 
 If a study already has age categories, pass the column name through
 `age_category`.
+
+## Wear-time inclusion criteria
+
+By default, the NHANES reference includes participants with at least 3
+valid days of at least 1,368 wear minutes (95% of the day). If your
+study used different inclusion rules, choose the matching criterion with
+`min_wear_minutes` and `min_valid_days`. The available criteria are
+listed by `nhanes_pa_wear_criteria()`:
+
+``` r
+nhanes_pa_wear_criteria()[, c("criterion", "min_wear_minutes",
+                              "min_valid_days", "default")]
+#>         criterion min_wear_minutes min_valid_days default
+#> 1   wear600_days1              600              1   FALSE
+#> 2   wear600_days3              600              3   FALSE
+#> 3   wear600_days4              600              4   FALSE
+#> 4   wear960_days1              960              1   FALSE
+#> 5   wear960_days3              960              3   FALSE
+#> 6   wear960_days4              960              4   FALSE
+#> 7  wear1296_days1             1296              1   FALSE
+#> 8  wear1296_days3             1296              3   FALSE
+#> 9  wear1296_days4             1296              4   FALSE
+#> 10 wear1368_days1             1368              1   FALSE
+#> 11 wear1368_days3             1368              3    TRUE
+#> 12 wear1368_days4             1368              4   FALSE
+#> 13 wear1440_days1             1440              1   FALSE
+#> 14 wear1440_days3             1440              3   FALSE
+#> 15 wear1440_days4             1440              4   FALSE
+```
+
+The same value can map to a different quantile under a different
+criterion, because the reference population and its survey weights
+change:
+
+``` r
+data.frame(
+  criterion = c("1368 min, 3 days (default)", "600 min, 4 days"),
+  nhanes_quantile = c(
+    nhanes_pa_quantile(15000, age = 25, sex = "Female", measure = "mims"),
+    nhanes_pa_quantile(15000, age = 25, sex = "Female", measure = "mims",
+                       min_wear_minutes = 600, min_valid_days = 4)
+  )
+)
+#>                    criterion nhanes_quantile
+#> 1 1368 min, 3 days (default)       0.5349443
+#> 2            600 min, 4 days       0.6424329
+```
 
 ## Funding acknowledgement
 

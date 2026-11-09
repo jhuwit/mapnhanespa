@@ -13,7 +13,9 @@ map_nhanes_pa_quantiles(
   value = "value",
   wave = NULL,
   age_category = NULL,
-  quantile_col = "nhanes_quantile"
+  quantile_col = "nhanes_quantile",
+  min_wear_minutes = 1368,
+  min_valid_days = 3
 )
 }
 \arguments{
@@ -36,6 +38,16 @@ such as \code{"[20,30)"} or \code{"Overall"}. When supplied, it is used instead 
 \code{age}.}
 
 \item{quantile_col}{Name of the output quantile column.}
+
+\item{min_wear_minutes, min_valid_days}{Accelerometer wear-time inclusion
+criterion for the NHANES reference population: the minimum minutes of
+wear for a valid day (\code{600}, \code{960}, \code{1296}, \code{1368}, or \code{1440}) and the
+minimum number of valid days (\code{1}, \code{3}, or \code{4}). The defaults
+(\code{1368} minutes, \code{3} days) use \link{nhanes_measure_data} and give the same
+results as earlier versions of the package. Other values use the matching
+criterion in \link{nhanes_measure_data_wear_criteria}, with survey weights
+adjusted for that criterion. Choose the criterion that matches the
+inclusion rules applied to \code{data}. See \code{\link[=nhanes_pa_wear_criteria]{nhanes_pa_wear_criteria()}}.}
 }
 \value{
 \code{data} with an added quantile column and \code{age_category_pa_map}, the
@@ -67,5 +79,9 @@ map_nhanes_pa_quantiles(example_data, sex = NULL)
 
 map_nhanes_pa_quantiles(example_data, age = NULL, wave = "2011-2012")
 map_nhanes_pa_quantiles(example_data, age = NULL, sex = NULL)
+
+# NHANES reference built with a 10-hour, 4-day wear criterion
+map_nhanes_pa_quantiles(example_data, min_wear_minutes = 600,
+                        min_valid_days = 4)
 
 }

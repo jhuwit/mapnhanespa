@@ -10,7 +10,9 @@ nhanes_pa_quantile(
   sex = NULL,
   measure,
   wave = NULL,
-  age_category = NULL
+  age_category = NULL,
+  min_wear_minutes = 1368,
+  min_valid_days = 3
 )
 }
 \arguments{
@@ -30,6 +32,16 @@ for every supported name and its CDF summary.}
 
 \item{age_category}{Optional NHANES age category such as \code{"[20,30)"} or
 \code{"Overall"}.}
+
+\item{min_wear_minutes, min_valid_days}{Accelerometer wear-time inclusion
+criterion for the NHANES reference population: the minimum minutes of
+wear for a valid day (\code{600}, \code{960}, \code{1296}, \code{1368}, or \code{1440}) and the
+minimum number of valid days (\code{1}, \code{3}, or \code{4}). The defaults
+(\code{1368} minutes, \code{3} days) use \link{nhanes_measure_data} and give the same
+results as earlier versions of the package. Other values use the matching
+criterion in \link{nhanes_measure_data_wear_criteria}, with survey weights
+adjusted for that criterion. Choose the criterion that matches the
+inclusion rules applied to \code{data}. See \code{\link[=nhanes_pa_wear_criteria]{nhanes_pa_wear_criteria()}}.}
 }
 \value{
 A numeric quantile in \verb{[0, 1]}, or \code{NA_real_} when no matching CDF is
@@ -52,5 +64,15 @@ nhanes_pa_quantile(
   sex = NULL,
   measure = "mims",
   wave = "2013-2014"
+)
+
+# Same value against a complete-wear (24 h), 1-day reference
+nhanes_pa_quantile(
+  value = 15000,
+  age = 25,
+  sex = "Female",
+  measure = "mims",
+  min_wear_minutes = 1440,
+  min_valid_days = 1
 )
 }

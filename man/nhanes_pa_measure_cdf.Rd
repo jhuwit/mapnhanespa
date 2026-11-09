@@ -9,7 +9,9 @@ nhanes_pa_measure_cdf(
   age = NULL,
   sex = NULL,
   wave = NULL,
-  age_category = NULL
+  age_category = NULL,
+  min_wear_minutes = 1368,
+  min_valid_days = 3
 )
 }
 \arguments{
@@ -22,11 +24,22 @@ nhanes_pa_measure_cdf(
 \item{wave}{Optional NHANES wave (\code{7}, \code{8}, \code{"2011-2012"}, or \code{"2013-2014"}).}
 
 \item{age_category}{Optional NHANES age category, used instead of \code{age}.}
+
+\item{min_wear_minutes, min_valid_days}{Accelerometer wear-time inclusion
+criterion for the NHANES reference population: the minimum minutes of
+wear for a valid day (\code{600}, \code{960}, \code{1296}, \code{1368}, or \code{1440}) and the
+minimum number of valid days (\code{1}, \code{3}, or \code{4}). The defaults
+(\code{1368} minutes, \code{3} days) use \link{nhanes_measure_data} and give the same
+results as earlier versions of the package. Other values use the matching
+criterion in \link{nhanes_measure_data_wear_criteria}, with survey weights
+adjusted for that criterion. Choose the criterion that matches the
+inclusion rules applied to \code{data}. See \code{\link[=nhanes_pa_wear_criteria]{nhanes_pa_wear_criteria()}}.}
 }
 \value{
 A CDF function, or \code{NA_real_} if no CDF is available.
 }
 \description{
 Uses the explicit aliases in \code{\link[=nhanes_pa_measure_map]{nhanes_pa_measure_map()}} to select the CDF
-calculated from the corresponding summary in \code{nhanes_measure_data}.
+calculated from the corresponding summary in \code{nhanes_measure_data}, or in
+\code{nhanes_measure_data_wear_criteria} for a non-default wear-time criterion.
 }
